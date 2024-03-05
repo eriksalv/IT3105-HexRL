@@ -71,8 +71,6 @@ class HexStateManager:
 
         starting_pieces = self.get_own_pieces(starting_coordinates)
 
-        print(starting_pieces)
-
         visited = {}
 
         for piece in starting_pieces:
@@ -87,12 +85,8 @@ class HexStateManager:
         pieces of the current player are considered valid edges for traversal
         """
         # Check if goal is reached
-        print(piece)
-        print(self.current_player)
-        print(piece[0])
         if (self.current_player == Player.RED and piece[0] == self.k-1) or \
                 (self.current_player == Player.BLUE and piece[1] == self.k-1):
-            print('wow')
             return True
 
         visited[piece] = True
