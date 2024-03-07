@@ -11,6 +11,7 @@ class Player(Enum):
 class HexStateManager:
     def __init__(self, k: int) -> None:
         self.k = k
+        self.winner = None
 
     def new_game(self, red_first=True) -> None:
         """
@@ -79,6 +80,10 @@ class HexStateManager:
 
         return False
 
+    def is_final(self):
+        return self.winner is not None or np.all(self.board != 0)
+        
+    
     def traverse(self, piece, visited):
         """
         Traverses current players pieces DEPTH FIRST (recursively). Only edges between
@@ -93,7 +98,22 @@ class HexStateManager:
         for neighbour_piece in self.get_own_pieces(self.get_neighbours(piece)):
             if neighbour_piece not in visited:
                 return self.traverse(neighbour_piece, visited)
+            
+    def get_possible_states(self) -> list['HexStateManager']:
+        possible_states = []
 
+        for move in self.get_legal_moves():
+            new_state = HexStateManager(self.k)
+            new_state.board = np.copy(self.board)
+            new_state.current_player = self.current_player
+            new_state.make_move(move)
+            possible_states.append(new_state)
+    
+        return possible_states
+
+    def is_win(self, player = Player.RED):
+        return self.winner == player
+    
     def show_board(self):
         """
         There is probably an easier way to visualize the board, but this was too much fun
@@ -148,4 +168,20 @@ class HexStateManager:
             ys = line[:, 1]
             plt.plot(xs, ys, c='black', zorder=-1)
 
-        plt.show(block=False)
+        plt.show(block=True)
+
+if __name__ == "__main__":
+    hex = HexStateManager(3)
+    hex.new_game()
+    #print(hex.get_legal_moves())
+    hex.make_move((0,0))
+    hex.make_move((2,0))
+    hex.make_move((0,1))
+    hex.make_move((1,0))
+    hex.make_move((1,1))
+    hex.make_move((1,2))
+    hex.get_possible_states()
+    hex.make_move((2,1))
+    print(hex.is_win())
+    print(hex.winner)
+    hex.show_board()

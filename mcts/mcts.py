@@ -23,8 +23,7 @@ class Node:
         if not self.children:
             print("Generating children")
             self.children = [Node(child_state, parent=self) for child_state in child_states]
-            for child in self.children:
-                child.state.get_state()
+            
 
 
     def update(self, result):
@@ -59,7 +58,7 @@ class MCTS:
 
   
 
-    def best_uct(self, node: Node, c_param=0.5):
+    def best_uct(self, node: Node, c_param=1.4):
         """
         Function that implements the exploitation vs exploration 
 
@@ -120,9 +119,9 @@ class MCTS:
         for child in node.children:
             print(child.number_of_visits)
             print(child.results)
-            child.state.get_state()
-            if child.results/child.number_of_visits > best_score:
-                best_score = child.results/child.number_of_visits
+            #child.state.get_state()
+            if child.number_of_visits > best_score:
+                best_score = child.number_of_visits
                 best_child = child
 
         return best_child
