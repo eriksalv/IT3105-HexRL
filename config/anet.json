@@ -1,0 +1,18 @@
+{
+  "learning_rate": 0.01,
+  "hidden_layers": [
+    {
+      "units": 32,
+      "activation": "relu"
+    },
+    {
+      "units": 32,
+      "activation": "tanh"
+    }
+  ],
+  "optimizer": "SGD",
+  "optimizer_kwargs": {
+    "momentum": 0.9
+  },
+  "loss": "categorical_crossentropy"
+}

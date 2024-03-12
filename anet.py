@@ -1,0 +1,91 @@
+import json
+from tensorflow import keras as ks
+import numpy as np
+from hex import HexStateManager
+
+
+class ActorNetwork:
+    def __init__(self, k: int, anet_config: dict) -> None:
+        self.input_size = k ** 2 + 1  # one unit per board node + 1 for current player
+        self.output_size = k ** 2
+        self.model = self.build_model(anet_config)
+
+    def build_model(self, anet_config: dict) -> ks.models.Model:
+        """
+        Builds and compiles a keras Model according to provided config
+        """
+        input_layer = ks.layers.Input(shape=(self.input_size,))
+        x = input_layer
+
+        hidden_layers = anet_config['hidden_layers']
+
+        for layer in hidden_layers:
+            x = ks.layers.Dense(
+                units=layer['units'],
+                activation=layer['activation'])(x)
+
+        output_layer = ks.layers.Dense(
+            units=self.output_size,
+            activation='softmax')(x)
+
+        model = ks.models.Model(inputs=input_layer, outputs=output_layer)
+
+        opt = eval('ks.optimizers.' + anet_config['optimizer'])
+
+        model.compile(
+            optimizer=opt(
+                learning_rate=anet_config['learning_rate'],
+                **anet_config['optimizer_kwargs']),
+            loss=anet_config['loss'],
+            metrics=[ks.metrics.CategoricalAccuracy()]
+        )
+        model.summary()
+
+        return model
+
+    def train(self, minibatch: list[tuple[np.ndarray, np.ndarray]]) -> None:
+        """
+        Trains the network on the cases in the minibatch (1 epoch).
+        Assumes that the minibatch is a list of tuples containing
+        the vectorized board state as the first element, and the
+        target output distribution as the second
+        """
+        input_cases = np.vstack([case[0] for case in minibatch])
+        output_cases = np.vstack([case[1] for case in minibatch])
+
+        self.model.fit(input_cases, output_cases)
+
+    def get_action(self, board_state: np.ndarray, current_player: int) -> int:
+        """
+        Vectorizes board state with current player, and feeds the
+        input vector into the model to produce an output distribution,
+        and selects the move with the highest probability.
+        """
+        input_case = self.vectorize_state(board_state, current_player)
+        output = self.model(input_case[np.newaxis]).numpy().flatten()
+        output = self.renormalize_output(output, board_state)
+        return np.argmax(output)
+
+    @staticmethod
+    def vectorize_state(board_state: np.ndarray, current_player: int) -> np.ndarray:
+        return np.append(board_state, current_player).astype(float)
+
+    @staticmethod
+    def renormalize_output(output: np.ndarray, board_state: np.ndarray) -> np.ndarray:
+        illegal_moves = np.where(board_state.flatten() != 0)
+        output[illegal_moves] = 0
+        return output / np.sum(output)
+
+
+if __name__ == '__main__':
+    hsm = HexStateManager(3)
+    hsm.make_move((0, 0))
+    hsm.make_move((0, 1))
+    hsm.make_move((1, 1))
+
+    with open('config/anet.json', 'r') as f:
+        config = json.load(f)
+
+    ANET = ActorNetwork(3, config)
+    action = ANET.get_action(hsm.board, hsm.current_player.value)
+    print(hsm.convert_to_move(action))
