@@ -3,6 +3,7 @@ import numpy as np
 
 
 class ReplayBuffer:
+    
     def __init__(self) -> None:
         self.cases: list[tuple[np.ndarray, np.ndarray]] = []
 
@@ -14,3 +15,6 @@ class ReplayBuffer:
             return self.cases
 
         return sample(self.cases, batch_size)
+    
+    def clear(self):
+        self.cases: list[tuple[np.ndarray, np.ndarray]] = []

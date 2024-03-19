@@ -1,8 +1,18 @@
 import math
 import random
 from anet import ActorNetwork
+import numpy as np
 
 
+def find_last_move(prev_state, current_state):
+    diff = current_state - prev_state
+    indices = np.argwhere(diff != 0)
+
+    if len(indices) == 1:
+        return tuple(indices[0])
+    else:
+        raise ValueError("Invalid states: More than one difference found.")
+    
 class Node:
     def __init__(self, state, parent=None):
         self.state = state
@@ -23,7 +33,7 @@ class Node:
             cs.get_state()
         """
         if not self.children:
-            print("Generating children")
+            #print("Generating children")
             self.children = [Node(child_state, parent=self) for child_state in child_states]
 
     def update(self, result):
@@ -118,11 +128,35 @@ class MCTS:
         best_child = None
         best_score = -1
         for child in node.children:
-            print(child.number_of_visits)
-            print(child.results)
+            #print(child.number_of_visits)
+            #print(child.results)
             # child.state.get_state()
             if child.number_of_visits > best_score:
                 best_score = child.number_of_visits
                 best_child = child
 
         return best_child
+
+    def get_distribution(self, node):
+        """
+        Compute the distribution of visit counts among the child nodes of the given node.
+        
+    
+        :node: The parent node for which to compute the distribution.
+        
+        :Returns: distribution: A dictionary mapping child nodes to their visit counts, normalized to form a probability distribution.
+        """
+        distribution = {}
+        total_visits = sum(child.number_of_visits for child in node.children)
+
+        for child in node.children:
+            action = find_last_move(node.state.board, child.state.board)
+            if total_visits == 0:
+                distribution[action] = 0.0
+            else:
+                distribution[action] = child.number_of_visits / total_visits
+        return distribution
+    
+    def update(self, node):
+        self.root = node
+        

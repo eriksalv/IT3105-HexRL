@@ -50,9 +50,10 @@ class ActorNetwork:
         the vectorized board state as the first element, and the
         target output distribution as the second
         """
+        
         input_cases = np.vstack([case[0] for case in minibatch])
         output_cases = np.vstack([case[1] for case in minibatch])
-
+       
         self.model.fit(input_cases, output_cases)
 
     def get_action(self, board_state: np.ndarray, current_player: int) -> int:
@@ -65,6 +66,15 @@ class ActorNetwork:
         output = self.model(input_case[np.newaxis]).numpy().flatten()
         output = self.renormalize_output(output, board_state)
         return np.argmax(output)
+
+    def save_parameters(self, filepath):
+        """
+        Save the parameters (weights) of the ANET model.
+
+        :param filepath: File path where the model weights will be saved.
+        """
+        self.model.save_weights(filepath)
+        print("ANET parameters saved successfully.")
 
     @staticmethod
     def vectorize_state(board_state: np.ndarray, current_player: int) -> np.ndarray:
