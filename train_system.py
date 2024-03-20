@@ -1,7 +1,7 @@
 import json
 from rbuf import ReplayBuffer
 from anet import ActorNetwork
-from mcts.mcts import MCTS, Node
+from mcts import MCTS, Node
 from hex import HexStateManager
 import numpy as np
 import sys
@@ -48,7 +48,7 @@ class GameManager:
             sinit = Node(Ba)
             root = sinit
             #initialize new mcts
-            mcts = MCTS(sinit, actor_net=self.anet)
+            mcts = MCTS(sinit, actor_net=self.anet, expansion_threshold=30)
 
             while not Ba.is_final():
                 
@@ -65,7 +65,9 @@ class GameManager:
                     # Perform MCTS backpropagation
                     mcts.backpropagate(leaf, F)
                 """
-                mcts.search(num_search_games)
+                current_player = self.hex_state_manager.current_player.value
+
+                mcts.search(num_search_games, player_value=current_player)
 
                 #update Replay Buffer
                 D = mcts.get_distribution(root)
@@ -75,7 +77,6 @@ class GameManager:
                 D_vectorized = vectorize_distribution(D_true)
 
                 vectorized_board = root.state.board.flatten()
-                current_player = self.hex_state_manager.current_player.value
                 vectorized_state = np.append(vectorized_board, current_player)
                 
                 self.replay_buffer.add_case((vectorized_state, D_vectorized))
@@ -98,4 +99,4 @@ class GameManager:
 
 if __name__ == "__main__":
     game_manager = GameManager()
-    game_manager.train(num_actual_games=20, num_search_games=100, save_interval=10)
+    game_manager.train(num_actual_games=50, num_search_games=200, save_interval=10)
