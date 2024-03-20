@@ -69,6 +69,7 @@ class HexStateManager:
         If current player is RED, start from the top row and search towards
         the bottom. If BLUE, go from left to right column.
         """
+       
         starting_coordinates = [(0, col) for col in range(self.k)] if self.current_player == Player.RED \
             else [(row, 0) for row in range(self.k)]
 
@@ -98,7 +99,9 @@ class HexStateManager:
         visited[piece] = True
         for neighbour_piece in self.get_own_pieces(self.get_neighbours(piece)):
             if neighbour_piece not in visited:
-                return self.traverse(neighbour_piece, visited)
+                if self.traverse(neighbour_piece, visited):
+                    return True
+        return False
 
     def get_possible_states(self) -> list['HexStateManager']:
         possible_states = []
@@ -133,7 +136,8 @@ class HexStateManager:
         row = output_action // self.k
         col = output_action % self.k
         return row, col
-
+    def show_board_crude(self):
+        print(self.board)
     def show_board(self):
         """
         There is probably an easier way to visualize the board, but this was too much fun
@@ -192,6 +196,7 @@ class HexStateManager:
 
 
 if __name__ == "__main__":
+    
     hex = HexStateManager(3)
     hex.new_game()
     # print(hex.get_legal_moves())
@@ -205,4 +210,22 @@ if __name__ == "__main__":
     hex.make_move((2, 1))
     print(hex.is_win())
     print(hex.winner)
+    hex.show_board_crude()
+    
+    
+    hex = HexStateManager(3)
+    hex.new_game()
+    hex.make_move((1,0))
+    hex.make_move((2, 0))
+    hex.make_move((1, 2))
+    hex.make_move((2, 1))
+    hex.make_move((1, 1))
+    hex.make_move((0, 1))
+    hex.make_move((0, 2))
+    hex.make_move((0, 0))
+    hex.make_move((2, 2))
+
+    print(hex.is_win())
+    print(hex.winner)
     hex.show_board()
+
