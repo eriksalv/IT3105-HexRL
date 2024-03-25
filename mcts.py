@@ -52,10 +52,14 @@ class MCTS:
         self.actor_net = actor_net
         self.expansion_threshold = expansion_threshold
 
-    def search(self, budget, player_value=1):
+    def search(self, budget, original_player_value=1):
+        self.original_player_value = original_player_value
+
         for _ in range(budget):
-            leaf = self.traverse(self.root)
+            leaf = self.traverse(self.root, original_player_value)
             simulation_result = self.rollout(leaf)
+            if original_player_value == 2:
+                simulation_result = 1 - simulation_result
             self.backpropagate(leaf, simulation_result)
         return self.best_child(self.root)
 
@@ -81,7 +85,7 @@ class MCTS:
         
         # Traverse down the tree until reaching a leaf node
        
-        if player_value == 1:
+        if player_value == self.original_player_value:
             chosen_child = self.best_uct(node)
         else:
             chosen_child = self.best_uct(node, opponent = True)  
@@ -103,11 +107,16 @@ class MCTS:
             return random.choice(unvisited_children)
 
         choices_weights = []
-        for c in node.children:
-            uct_value = (c.results / c.number_of_visits) + c_param * math.sqrt(
-                math.log(node.number_of_visits) / c.number_of_visits)
-            choices_weights.append(uct_value)
-
+        if not opponent:
+            for c in node.children:
+                uct_value = (c.results / c.number_of_visits) + c_param * math.sqrt(
+                    math.log(node.number_of_visits) / c.number_of_visits)
+                choices_weights.append(uct_value)
+        else: 
+            for c in node.children:
+                uct_value = (c.results / c.number_of_visits) - c_param * math.sqrt(
+                    math.log(node.number_of_visits) / c.number_of_visits)
+                choices_weights.append(uct_value)
         # get the child with the maximum UCT value
         if not opponent:
             best_child = node.children[choices_weights.index(max(choices_weights))]

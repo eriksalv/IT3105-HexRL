@@ -28,13 +28,14 @@ def vectorize_distribution(distribution):
 
     return vectorized_distribution
 class GameManager:
-    def __init__(self):
-        self.hex_state_manager = HexStateManager(3)
+    def __init__(self, k):
+        self.k = k
+        self.hex_state_manager = HexStateManager(self.k)
         self.replay_buffer = ReplayBuffer()
 
         with open('config/anet.json', 'r', encoding='utf-8') as f:
             config = json.load(f)
-        self.anet = ActorNetwork(3, config)
+        self.anet = ActorNetwork(self.k, config)
         
 
     def train(self, num_actual_games, num_search_games, save_interval):
@@ -48,7 +49,7 @@ class GameManager:
             sinit = Node(Ba)
             root = sinit
             #initialize new mcts
-            mcts = MCTS(sinit, actor_net=self.anet, expansion_threshold=30)
+            mcts = MCTS(sinit, actor_net=self.anet, expansion_threshold=7)
 
             while not Ba.is_final():
                 
@@ -67,15 +68,15 @@ class GameManager:
                 """
                 current_player = self.hex_state_manager.current_player.value
 
-                mcts.search(num_search_games, player_value=current_player)
+                mcts.search(num_search_games, original_player_value=current_player)
 
                 #update Replay Buffer
                 D = mcts.get_distribution(root)
                 
-                D_true = create_distribution(D, 3)
+                D_true = create_distribution(D, self.k)
                 #print(D_true)
                 D_vectorized = vectorize_distribution(D_true)
-
+                #print(D_vectorized)
                 vectorized_board = root.state.board.flatten()
                 vectorized_state = np.append(vectorized_board, current_player)
                 
@@ -91,12 +92,14 @@ class GameManager:
                 mcts.update(root)
 
             #train ANET
-            minibatch = self.replay_buffer.get_minibatch()
+            minibatch = self.replay_buffer.get_minibatch(batch_size=128)
+            #self.replay_buffer.clear()
+            print(len(self.replay_buffer.cases))
             self.anet.train(minibatch)
-            if ga % save_interval == 0:
+            if ga % save_interval == 0 or ga == 1:
                 #save ANET parameters
                 self.anet.save_parameters(f'./trained_networks/anet_{ga}.weights.h5')
 
 if __name__ == "__main__":
-    game_manager = GameManager()
-    game_manager.train(num_actual_games=50, num_search_games=200, save_interval=10)
+    game_manager = GameManager(k=3)
+    game_manager.train(num_actual_games=50, num_search_games=300, save_interval=10)

@@ -39,11 +39,11 @@ class ActorNetwork:
             loss=anet_config['loss'],
             metrics=[ks.metrics.CategoricalAccuracy()]
         )
-        model.summary()
+        #model.summary()
 
         return model
 
-    def train(self, minibatch: list[tuple[np.ndarray, np.ndarray]]) -> None:
+    def train(self, minibatch: list[tuple[np.ndarray, np.ndarray]], verbose = 1) -> None:
         """
         Trains the network on the cases in the minibatch (1 epoch).
         Assumes that the minibatch is a list of tuples containing
@@ -54,7 +54,7 @@ class ActorNetwork:
         input_cases = np.vstack([case[0] for case in minibatch])
         output_cases = np.vstack([case[1] for case in minibatch])
        
-        self.model.fit(input_cases, output_cases)
+        self.model.fit(input_cases, output_cases, verbose = verbose)
 
     def get_action(self, board_state: np.ndarray, current_player: int) -> int:
         """
