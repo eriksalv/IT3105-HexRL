@@ -5,15 +5,23 @@ from hex import HexStateManager
 
 
 class ActorNetwork:
-    def __init__(self, k: int, anet_config: dict) -> None:
+    def __init__(self, k: int, anet_config_name: str, saved_weights_file=None) -> None:
+        self.k = k
         self.input_size = k ** 2 + 1  # one unit per board node + 1 for current player
         self.output_size = k ** 2
-        self.model = self.build_model(anet_config)
+        self.model = self.build_model(anet_config_name)
 
-    def build_model(self, anet_config: dict) -> ks.models.Model:
+        if saved_weights_file is not None:
+            self.model.load_weights(
+                f'./trained_networks/{saved_weights_file}.weights.h5')
+
+    def build_model(self, anet_config_name: str) -> ks.models.Model:
         """
         Builds and compiles a keras Model according to provided config
         """
+        with open(f'config/{anet_config_name}.json', 'r', encoding='utf-8') as f:
+            anet_config = json.load(f)
+
         input_layer = ks.layers.Input(shape=(self.input_size,))
         x = input_layer
 
@@ -36,27 +44,25 @@ class ActorNetwork:
             optimizer=opt(
                 learning_rate=anet_config['learning_rate'],
                 **anet_config['optimizer_kwargs']),
-            loss=anet_config['loss'],
-            metrics=[ks.metrics.CategoricalAccuracy()]
+            loss=anet_config['loss']
         )
-        #model.summary()
+        # model.summary()
 
         return model
 
-    def train(self, minibatch: list[tuple[np.ndarray, np.ndarray]], verbose = 1) -> None:
+    def train(self, minibatch: list[tuple[np.ndarray, np.ndarray]], verbose=1) -> None:
         """
         Trains the network on the cases in the minibatch (1 epoch).
         Assumes that the minibatch is a list of tuples containing
         the vectorized board state as the first element, and the
         target output distribution as the second
         """
-        
         input_cases = np.vstack([case[0] for case in minibatch])
         output_cases = np.vstack([case[1] for case in minibatch])
-       
-        self.model.fit(input_cases, output_cases, verbose = verbose)
 
-    def get_action(self, board_state: np.ndarray, current_player: int) -> int:
+        self.model.fit(input_cases, output_cases, verbose=verbose)
+
+    def get_action(self, board_state: np.ndarray, current_player: int) -> tuple[int, int]:
         """
         Vectorizes board state with current player, and feeds the
         input vector into the model to produce an output distribution,
@@ -65,7 +71,12 @@ class ActorNetwork:
         input_case = self.vectorize_state(board_state, current_player)
         output = self.model(input_case[np.newaxis]).numpy().flatten()
         output = self.renormalize_output(output, board_state)
-        return np.argmax(output)
+        action_idx = int(np.argmax(output))
+
+        # Convert flat action index to row and col in 2D board
+        row = action_idx // self.k
+        col = action_idx % self.k
+        return row, col
 
     def save_parameters(self, filepath):
         """
@@ -93,9 +104,6 @@ if __name__ == '__main__':
     hsm.make_move((0, 1))
     hsm.make_move((1, 1))
 
-    with open('config/anet.json', 'r') as f:
-        config = json.load(f)
-
-    ANET = ActorNetwork(3, config)
+    ANET = ActorNetwork(3, 'anet')
     action = ANET.get_action(hsm.board, hsm.current_player.value)
-    print(hsm.convert_to_move(action))
+    print(action)

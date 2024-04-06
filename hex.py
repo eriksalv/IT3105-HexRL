@@ -69,7 +69,7 @@ class HexStateManager:
         If current player is RED, start from the top row and search towards
         the bottom. If BLUE, go from left to right column.
         """
-       
+
         starting_coordinates = [(0, col) for col in range(self.k)] if self.current_player == Player.RED \
             else [(row, 0) for row in range(self.k)]
 
@@ -129,15 +129,9 @@ class HexStateManager:
     def is_win(self, player=Player.RED):
         return self.winner == player
 
-    def convert_to_move(self, output_action: int) -> tuple[int, int]:
-        """
-        Converts ANET output action (flat index) to a move (2D index)
-        """
-        row = output_action // self.k
-        col = output_action % self.k
-        return row, col
     def show_board_crude(self):
         print(self.board)
+
     def show_board(self):
         """
         There is probably an easier way to visualize the board, but this was too much fun
@@ -196,7 +190,7 @@ class HexStateManager:
 
 
 if __name__ == "__main__":
-    
+
     hex = HexStateManager(3)
     hex.new_game()
     # print(hex.get_legal_moves())
@@ -211,11 +205,10 @@ if __name__ == "__main__":
     print(hex.is_win())
     print(hex.winner)
     hex.show_board_crude()
-    
-    
+
     hex = HexStateManager(3)
     hex.new_game()
-    hex.make_move((1,0))
+    hex.make_move((1, 0))
     hex.make_move((2, 0))
     hex.make_move((1, 2))
     hex.make_move((2, 1))
@@ -228,4 +221,3 @@ if __name__ == "__main__":
     print(hex.is_win())
     print(hex.winner)
     hex.show_board()
-
