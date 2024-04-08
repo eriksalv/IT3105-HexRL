@@ -38,7 +38,9 @@ if __name__ == "__main__":
     mcts = MCTS(root, actor_net=net)
     best_child = mcts.search(100)
     best_move = find_last_move(root_state.board, best_child.state.board)
+    distribution = mcts.get_distribution(root)
     print(f"Best move: {best_move} ")
+    print(distribution)
 
     hsm = HexStateManager(k)
     hsm.new_game()
@@ -61,4 +63,7 @@ if __name__ == "__main__":
     mcts = MCTS(root, actor_net=net)
     best_child = mcts.search(100, original_player_value=2)
     best_move = find_last_move(root_state.board, best_child.state.board)
+    distribution = mcts.get_distribution(root)
     print(f"Best move: {best_move} ")
+    print(distribution)
+    print(root.results)
