@@ -1,8 +1,8 @@
-from hex import HexStateManager
-from mcts import MCTS, Node
 import numpy as np
+
 from anet import ActorNetwork
-import json
+from games.hex import HexStateManager, Player
+from mcts import MCTS, Node
 
 
 def find_last_move(prev_state, current_state):
@@ -18,24 +18,22 @@ def find_last_move(prev_state, current_state):
 if __name__ == "__main__":
     k = 3
     hsm = HexStateManager(k)
-    hsm.new_game()
+    hsm.new_game(starting_player=Player.BLUE)
     hsm.make_move((0, 0))
-    hsm.make_move((2, 0))
-    hsm.make_move((0, 1))
     hsm.make_move((1, 0))
+    hsm.make_move((0, 1))
     hsm.make_move((1, 1))
-    hsm.make_move((1, 2))
-    # hsm.show_board()
-    # hsm.make_move((2,1)) winning move
+    # hsm.make_move((0,2)) winning move
 
-    root_state = hsm
-    root = Node(root_state)
+    root = Node(state=hsm.get_state())
 
     net = ActorNetwork(3, 'anet')
-    mcts = MCTS(root, actor_net=net)
-    best_child = mcts.search(100)
-    best_move = find_last_move(root_state.board, best_child.state.board)
+    mcts = MCTS(state_manager=hsm, root=root, actor_net=net)
+    best_move, distribution = mcts.search(100)
     print(f"Best move: {best_move} ")
+    print(distribution)
+    print(root.value)
+    print(root.actions)
 
     hsm = HexStateManager(k)
     hsm.new_game()
@@ -44,14 +42,15 @@ if __name__ == "__main__":
     hsm.make_move((0, 1))
     hsm.make_move((1, 1))
     hsm.make_move((1, 2))
-    # hsm.make_move((0, 2)) #winning move for blue
     hsm.show_board()
+    # hsm.make_move((0,2)) winning move
 
-    root_state = hsm
-    root = Node(root_state)
+    root = Node(state=hsm.get_state())
 
     net = ActorNetwork(3, 'anet')
-    mcts = MCTS(root, actor_net=net)
-    best_child = mcts.search(100, original_player_value=2)
-    best_move = find_last_move(root_state.board, best_child.state.board)
+    mcts = MCTS(state_manager=hsm, root=root, actor_net=net)
+    best_move, distribution = mcts.search(100)
     print(f"Best move: {best_move} ")
+    print(distribution)
+    print(root.value)
+    print(root.actions)

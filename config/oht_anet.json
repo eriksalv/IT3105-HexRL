@@ -2,11 +2,19 @@
   "learning_rate": 0.01,
   "hidden_layers": [
     {
-      "units": 64,
+      "units": 512,
       "activation": "relu"
     },
     {
-      "units": 32,
+      "units": 256,
+      "activation": "relu"
+    },
+    {
+      "units": 128,
+      "activation": "relu"
+    },
+    {
+      "units": 64,
       "activation": "relu"
     }
   ],

@@ -1,9 +1,10 @@
 import numpy as np
 
 from anet import ActorNetwork
-from ActorClient import ActorClient
+from hex_client.ActorClient import ActorClient
 
-actor = ActorNetwork(k=7, anet_config='anet', saved_weights_file='anet_50_7x7')
+actor = ActorNetwork(k=7, anet_config_name='oht_anet',
+                     saved_weights_file='oht_anet_7x7_0')
 
 
 class MyClient(ActorClient):

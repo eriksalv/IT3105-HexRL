@@ -1,6 +1,8 @@
-import numpy as np
-import matplotlib.pyplot as plt
+import random
 from enum import Enum
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class Player(Enum):
@@ -15,7 +17,7 @@ class HexStateManager:
         self.board = np.zeros((self.k, self.k), dtype=np.int8)
         self.current_player = Player.RED
 
-    def new_game(self, red_first=True) -> None:
+    def new_game(self, starting_player=Player.RED) -> None:
         """
         Hex board is represented as a square array. The RED player's goal is
         to connect the "top" and "bottom" of the array, and the BLUE player's goal
@@ -25,7 +27,7 @@ class HexStateManager:
         """
         self.winner = None
         self.board = np.zeros((self.k, self.k), dtype=np.int8)
-        self.current_player = Player.RED if red_first is True else Player.BLUE
+        self.current_player = starting_player
 
     def get_legal_moves(self) -> list[tuple[int, int]]:
         coordinates = []
@@ -69,7 +71,6 @@ class HexStateManager:
         If current player is RED, start from the top row and search towards
         the bottom. If BLUE, go from left to right column.
         """
-
         starting_coordinates = [(0, col) for col in range(self.k)] if self.current_player == Player.RED \
             else [(row, 0) for row in range(self.k)]
 
@@ -84,7 +85,7 @@ class HexStateManager:
         return False
 
     def is_final(self):
-        return self.winner is not None or np.all(self.board != 0)
+        return self.winner is not None
 
     def traverse(self, piece, visited):
         """
@@ -103,34 +104,24 @@ class HexStateManager:
                     return True
         return False
 
-    def get_possible_states(self) -> list['HexStateManager']:
+    def get_state(self) -> tuple[np.ndarray, int]:
+        return self.board.copy(), self.current_player.value
+
+    def get_possible_states(self, legal_moves: list[tuple[int, int]]) -> list[tuple[np.ndarray, int]]:
         possible_states = []
 
-        for move in self.get_legal_moves():
-            new_state = HexStateManager(self.k)
-            new_state.board = np.copy(self.board)
-            new_state.current_player = self.current_player
-            new_state.make_move(move)
-            possible_states.append(new_state)
+        for move in legal_moves:
+            board = self.board.copy()
+            board[move] = self.current_player.value
+            next_player = Player.RED.value if self.current_player == Player.BLUE else Player.BLUE.value
+            possible_states.append((board, next_player))
 
         return possible_states
 
-    def get_next_state(self, move: tuple[int, int]) -> 'HexStateManager':
-        # TODO: Implementer MCTS uten å lage nye HexStateManager
-        #  objekter per node, bare bruk board og current_player direkte.
-        #  Har en følelse for at å lage objekter for alle nodene i MCTS-treet
-        #  vil føre til dårlig performance.
-        next_state = HexStateManager(self.k)
-        next_state.board = np.copy(self.board)
-        next_state.current_player = self.current_player
-        next_state.make_move(move)
-        return next_state
-
-    def is_win(self, player=Player.RED):
-        return self.winner == player
-
-    def show_board_crude(self):
-        print(self.board)
+    def make_random_starting_move(self):
+        middle_line = [(i, j) for i in range(self.k) for j in range(self.k) if i + j == self.k - 1]
+        move = random.choice(middle_line)
+        self.make_move(move)
 
     def show_board(self):
         """
@@ -190,34 +181,8 @@ class HexStateManager:
 
 
 if __name__ == "__main__":
+    state_manager = HexStateManager(5)
+    state_manager.new_game()
+    state_manager.make_random_starting_move()
 
-    hex = HexStateManager(3)
-    hex.new_game()
-    # print(hex.get_legal_moves())
-    hex.make_move((0, 0))
-    hex.make_move((2, 0))
-    hex.make_move((0, 1))
-    hex.make_move((1, 0))
-    hex.make_move((1, 1))
-    hex.make_move((1, 2))
-    hex.get_possible_states()
-    hex.make_move((2, 1))
-    print(hex.is_win())
-    print(hex.winner)
-    hex.show_board_crude()
-
-    hex = HexStateManager(3)
-    hex.new_game()
-    hex.make_move((1, 0))
-    hex.make_move((2, 0))
-    hex.make_move((1, 2))
-    hex.make_move((2, 1))
-    hex.make_move((1, 1))
-    hex.make_move((0, 1))
-    hex.make_move((0, 2))
-    hex.make_move((0, 0))
-    hex.make_move((2, 2))
-
-    print(hex.is_win())
-    print(hex.winner)
-    hex.show_board()
+    state_manager.show_board()
