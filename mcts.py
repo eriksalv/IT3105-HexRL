@@ -35,7 +35,6 @@ class MCTS:
         self.root = root
         self.actor_net = actor_net
         self.expansion_threshold = expansion_threshold
-        self.root.init_actions_and_values(self.state_manager.get_legal_moves())
 
     def reset_position(self) -> None:
         """
@@ -74,7 +73,7 @@ class MCTS:
         reward = self.sim_rollout()
         self.backpropagate(leaf, reward)
 
-    def sim_tree_policy(self, use_expansion_threshold=False) -> Node:
+    def sim_tree_policy(self, use_expansion_threshold=True) -> Node:
         """
         Runs tree policy until a leaf node is reached.
         If using expansion_threshold then a leaf node will

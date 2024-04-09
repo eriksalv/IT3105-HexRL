@@ -27,6 +27,7 @@ class RLTrainer:
             self.state_manager.new_game(starting_player=starting_player)
             s_init = self.state_manager.get_state()
             root = Node(s_init)
+            root.init_actions_and_values(self.state_manager.get_legal_moves())
 
             while not self.state_manager.is_final():
                 search_tree = MCTS(self.state_manager, root, self.anet)
@@ -61,5 +62,5 @@ if __name__ == "__main__":
     #                    simulations=1000,
     #                    save_interval=20)
 
-    trainer = RLTrainer(k=5, anet_config_name='anet')
-    trainer.train(episodes=200, simulations=300, save_interval=10)
+    trainer = RLTrainer(k=4, anet_config_name='anet')
+    trainer.train(episodes=200, simulations=500, save_interval=40)
