@@ -18,9 +18,11 @@ class Simulation:
 
         while not hsm.is_final():
             if hsm.current_player == Player.RED:
-                action = self.anet1.get_action(hsm.board, hsm.current_player.value)
+                action = self.anet1.get_action(
+                    hsm.board, hsm.current_player.value)
             else:
-                action = self.anet2.get_action(hsm.board, hsm.current_player.value)
+                action = self.anet2.get_action(
+                    hsm.board, hsm.current_player.value)
 
             hsm.make_move(action)
 
@@ -33,7 +35,8 @@ class Simulation:
         win_dict = {1: 0, 2: 0}
         starting_player = Player.RED
         for _ in range(n_games):
-            winner = self.play_game(starting_player=starting_player, show_board=show_board)
+            winner = self.play_game(
+                starting_player=starting_player, show_board=show_board)
             win_dict[winner] += 1
 
             # alternate if player 1 (red) or player 2 (blue) starts
@@ -61,9 +64,11 @@ def simulate_tourney(epochs: list[int], k=3, anet='anet', n_games=25):
 
     print(f'Total wins: {model_wins}')
 
-    win_rates = {epoch: wins / (2 * n_games * (len(epochs) - 1)) for epoch, wins in model_wins.items()}
+    win_rates = {epoch: wins / (2 * n_games * (len(epochs) - 1))
+                 for epoch, wins in model_wins.items()}
     print(f'Win rates: {win_rates}')
 
 
 if __name__ == '__main__':
-    simulate_tourney(k=7, epochs=[0, 10, 20, 30, 40, 50], anet='anet', n_games=25)
+    simulate_tourney(k=4, epochs=[0, 40, 80, 120,
+                     160, 200], anet='anet', n_games=25)
