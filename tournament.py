@@ -70,5 +70,4 @@ def simulate_tourney(epochs: list[int], k=3, anet='anet', n_games=25):
 
 
 if __name__ == '__main__':
-    simulate_tourney(k=4, epochs=[0, 40, 80, 120,
-                     160, 200], anet='anet', n_games=25)
+    simulate_tourney(k=7, epochs=[0,10,20,30,40,50], anet='jespee_anet', n_games=25)

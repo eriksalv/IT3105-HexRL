@@ -56,7 +56,7 @@ class ActorNetwork:
 
         return model
 
-    def train(self, minibatch: list[tuple[np.ndarray, np.ndarray]]) -> None:
+    def train(self, minibatch: list[tuple[np.ndarray, np.ndarray]], epochs = 10) -> None:
         """
         Trains the network on the cases in the minibatch (1 epoch).
         Assumes that the minibatch is a list of tuples containing
@@ -66,7 +66,7 @@ class ActorNetwork:
         input_cases = np.vstack([case[0] for case in minibatch])
         output_cases = np.vstack([case[1] for case in minibatch])
 
-        history = self.model.fit(input_cases, output_cases, batch_size=len(minibatch))
+        history = self.model.fit(input_cases, output_cases, batch_size=len(minibatch), epochs = epochs)
         self.history.append(history.history['loss'])
 
     def get_action(self, board_state: np.ndarray, current_player: int) -> tuple[int, int]:
