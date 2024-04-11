@@ -54,11 +54,10 @@ class RLTrainer:
                 else:
                     case = self.anet.vectorize_case(root.state, distribution)
 
-                self.replay_buffer.add_case(case)
-
                
                 generated_cases = generate_more_cases(state=root.state[0], distribution=case[1], k = self.k, player_value=root.state[1], contains_bridges = self.contains_bridges, padding = self.padding)
                 for case in generated_cases:
+                    print(case)
                     self.replay_buffer.add_case(case)
 
                 self.state_manager.make_move(best_action)
@@ -77,12 +76,12 @@ class RLTrainer:
             if episode % save_interval == 0:
                 # save ANET parameters
                 self.anet.save_parameters(
-                    f'./trained_networks/cnn_{self.anet_config_name}_{self.k}x{self.k}_{episode}.weights.h5')
+                    f'./trained_networks/{self.anet_config_name}_{self.k}x{self.k}_{episode}.weights.h5')
         self.anet.plot_history()
 
 
 if __name__ == "__main__":
-    game_manager = RLTrainer(k=3, anet_config_name='jespee_anet', contains_bridges=True, padding=True, cnn=True)
+    game_manager = RLTrainer(k=3, anet_config_name='jespee_anet', contains_bridges=False, padding=True, cnn=False)
     game_manager.train(episodes=1,
                        simulations=200,
                        save_interval=10)
