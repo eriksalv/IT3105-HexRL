@@ -82,12 +82,13 @@ def add_padding(board):
 
     return padded_board
 
-def play_game(k, starting_player, current_best_net, new_net, show_board=False):
+def play_game(k, starting_player, current_best_net, new_net, show_board=False, random_move = True):
         hsm = HexStateManager(k)
         hsm.new_game(starting_player=starting_player)
 
         # To make games not identical, start by playing a random move in the middle horizontal line of the hex board
-        hsm.make_random_starting_move()
+        if random_move:
+            hsm.make_random_starting_move()
 
         while not hsm.is_final():
             if hsm.current_player == Player.RED:
@@ -104,12 +105,12 @@ def play_game(k, starting_player, current_best_net, new_net, show_board=False):
 
         return hsm.winner.value
 
-def simulate_games(k, current_best_net, new_net, n_games=400, show_board=False):
+def simulate_games(k, current_best_net, new_net, n_games=400, show_board=False, random_move = True):
         win_dict = {1: 0, 2: 0}
         starting_player = Player.RED
         for _ in range(n_games):
             winner = play_game(
-                k, starting_player, current_best_net, new_net, show_board=show_board)
+                k, starting_player, current_best_net, new_net, show_board=show_board, random_move = random_move)
             win_dict[winner] += 1
 
             # alternate if player 1 (red) or player 2 (blue) starts
@@ -117,8 +118,9 @@ def simulate_games(k, current_best_net, new_net, n_games=400, show_board=False):
 
         return win_dict
 
-def evaluate_network(current_best_net, new_net, k, n_games = 400, threshold = 0.55):
-    res = simulate_games(k=k, current_best_net=current_best_net, new_net=new_net, n_games=n_games)
+def evaluate_network(current_best_net, new_net, k, n_games = 400, threshold = 0.55, random_move = True):
+    res = simulate_games(k=k, current_best_net=current_best_net, new_net=new_net, n_games=n_games, random_move = random_move)
+    print(res)
     new_net_wr = res[2]/n_games
     print('Winrate of new net: ')
     print(new_net_wr)

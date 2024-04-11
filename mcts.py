@@ -30,12 +30,13 @@ class MCTS:
     """
 
     def __init__(self, state_manager: HexStateManager, root: Node, actor_net: ActorNetwork = None,
-                 expansion_threshold=20) -> None:
+                 expansion_threshold=20, c = np.sqrt(2)) -> None:
         self.state_manager = state_manager
         self.root = root
         self.actor_net = actor_net
         self.expansion_threshold = expansion_threshold
-
+        self.c = c
+        #self.root.init_actions_and_values(self.state_manager.get_legal_moves())
     def reset_position(self) -> None:
         """
         Resets board to root position and player
@@ -139,7 +140,7 @@ class MCTS:
 
         for action in legal_moves:
             values.append(node.value[action])
-            ucts.append(c * np.sqrt(np.log(node.visits) / (1 + node.actions[action])))
+            ucts.append(self.c * np.sqrt(np.log(node.visits) / (1 + node.actions[action])))
 
         values = np.array(values)
         ucts = np.array(ucts)
@@ -168,8 +169,12 @@ class MCTS:
                 action = random.choice(legal_moves)
             else:
                 action = self.actor_net.get_action(board_state=state[0], current_player=state[1])
-
-            self.state_manager.make_move(action)
+            try:
+                self.state_manager.make_move(action)
+            except ValueError as e:
+                    print(f"Failed move: {action}")
+                    print(f"Current state before failure: " )
+                    print(self.state_manager.board)
             state = self.state_manager.get_state()
 
         return 1 if self.state_manager.winner == Player.RED else -1
@@ -201,4 +206,5 @@ class MCTS:
             A dictionary mapping actions to their visit counts, normalized to form a probability distribution.
         """
         total_visits = sum(visits for visits in self.root.actions.values())
+        
         return {action: visits / total_visits for action, visits in self.root.actions.items()}
