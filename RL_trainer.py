@@ -57,7 +57,7 @@ class RLTrainer:
                
                 generated_cases = generate_more_cases(state=root.state[0], distribution=case[1], k = self.k, player_value=root.state[1], contains_bridges = self.contains_bridges, padding = self.padding)
                 for case in generated_cases:
-                    print(case)
+          
                     self.replay_buffer.add_case(case)
 
                 self.state_manager.make_move(best_action)
