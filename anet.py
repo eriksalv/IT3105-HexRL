@@ -83,14 +83,14 @@ class ActorNetwork:
         input vector into the model to produce an output distribution,
         and selects the move with the highest probability.
         """
-        original_board_shape = copy.deepcopy(board_state)
+        manipulated_board_shape = copy.deepcopy(board_state)
         if self.padding:
-            board_state = add_padding(board_state)
+            manipulated_board_shape = add_padding(manipulated_board_shape)
         if self.contains_bridges:
-            board_state = mark_bridges(board_state)
-        input_case = self.vectorize_state(board_state, current_player)
+            manipulated_board_shape = mark_bridges(manipulated_board_shape)
+        input_case = self.vectorize_state(manipulated_board_shape, current_player)
         output = self.model(input_case[np.newaxis]).numpy().flatten()
-        output = self.renormalize_output(output, original_board_shape, contains_bridges=self.contains_bridges, padding = self.padding)
+        output = self.renormalize_output(output, board_state, contains_bridges=self.contains_bridges, padding = self.padding)
         action_idx = int(np.argmax(output))
 
         # Convert flat action index to row and col in 2D board

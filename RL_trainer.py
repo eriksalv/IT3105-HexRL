@@ -5,12 +5,13 @@ from anet import ActorNetwork
 from games.hex import HexStateManager, Player, mark_bridges
 from mcts import MCTS, Node
 from rbuf import ReplayBuffer
-from utils import add_padding, generate_more_cases
+from utils import add_padding, generate_more_cases, evaluate_network
 from cnn_network import CNN
 import sys
 sys.stdout.reconfigure(encoding='utf-8')
 import tensorflow as tf
 print(tf.config.experimental.list_physical_devices('GPU'))
+
 class RLTrainer:
     def __init__(self, k: int, anet_config_name: str, contains_bridges = False, padding = False, cnn = False):
         self.k = k
@@ -33,6 +34,10 @@ class RLTrainer:
             
         for episode in range(1, episodes + 1):
             print(f'Episode: {episode}')
+            if episode % 5 == 0 and evaluate_during:
+                if evaluate_network(evaluation_network, self.anet, self.k, n_games=400, threshold=0.55):
+                    evaluation_network = copy.deepcopy(self.anet)
+
             start = time.perf_counter()
 
             # initialize new board
@@ -43,7 +48,7 @@ class RLTrainer:
 
             
             while not self.state_manager.is_final():
-                search_tree = MCTS(self.state_manager, root, self.anet, expansion_threshold=50)
+                search_tree = MCTS(self.state_manager, root, self.anet, expansion_threshold=20)
                 best_action, distribution = search_tree.search(simulations)
                 board_state = root.state[0]
                 if self.padding:
@@ -76,15 +81,16 @@ class RLTrainer:
             if episode % save_interval == 0:
                 # save ANET parameters
                 self.anet.save_parameters(
-                    f'./trained_networks/{self.anet_config_name}_{self.k}x{self.k}_{episode}.weights.h5')
+                    f'./trained_networks/{self.anet_config_name}_no_bridges_{self.k}x{self.k}_{episode}.weights.h5')
         self.anet.plot_history()
 
 
 if __name__ == "__main__":
-    game_manager = RLTrainer(k=3, anet_config_name='jespee_anet', contains_bridges=False, padding=True, cnn=False)
-    game_manager.train(episodes=1,
-                       simulations=200,
-                       save_interval=10)
+    game_manager = RLTrainer(k=3, anet_config_name='jespee_anet', contains_bridges=False, padding=False, cnn=False)
+    game_manager.train(episodes=200,
+                       simulations=500,
+                       save_interval=20,
+                       evaluate_during=True)
 
     #trainer = RLTrainer(k=4, anet_config_name='anet')
     #trainer.train(episodes=200, simulations=500, save_interval=40)
