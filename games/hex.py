@@ -122,6 +122,9 @@ class HexStateManager:
         middle_line = [(i, j) for i in range(self.k) for j in range(self.k) if i + j == self.k - 1]
         move = random.choice(middle_line)
         self.make_move(move)
+    
+    
+        
 
     def show_board(self):
         """
@@ -180,9 +183,41 @@ class HexStateManager:
         plt.show(block=True)
 
 
-if __name__ == "__main__":
-    state_manager = HexStateManager(5)
-    state_manager.new_game()
-    state_manager.make_random_starting_move()
+def mark_bridges(board):
+    k = len(board)
+    diagonal_offsets = [(-1, 1), (-1, -1), (1, 1), (1, -1)]
 
-    state_manager.show_board()
+    for row in range(k):
+        for col in range(k):
+            # Check if the current cell contains a stone
+            if board[row][col] in {1, 2}:
+                # Check diagonally adjacent cells
+                for dr, dc in diagonal_offsets:
+                    r, c = row + dr, col + dc
+                    # Check if the diagonal cell is within the board boundaries
+                    if 0 <= r < k and 0 <= c < k and board[r][c] == board[row][col]:
+                        # Mark the connecting coordinates with 3 for player 1 and 4 for player 2
+                        if board[row][col] == 1:
+                            if board[row][c] == 0: board[row][c] = 3
+                            if board[r][col] ==0: board[r][col] = 3
+                        elif board[row][col] == 2:
+                            if board[row][c]==0: board[row][c] = 4
+                            if board[r][col] ==0: board[r][col] = 4
+
+    return board
+
+if __name__ == "__main__":
+    state_manager = HexStateManager(4)
+    state_manager.new_game()
+    state_manager.make_move((1,1))
+    state_manager.make_move((3,0))
+    state_manager.make_move((0,0))
+    state_manager.make_move((2,1))
+    state_manager.make_move((2,2))
+
+    print(state_manager.board)
+
+
+    #state_manager.show_board()
+    new_board = mark_bridges(state_manager.board)
+    print(new_board)
