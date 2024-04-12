@@ -3,8 +3,8 @@ import numpy as np
 from anet import ActorNetwork
 from hex_client.ActorClient import ActorClient
 
-actor = ActorNetwork(k=7, anet_config_name='oht_anet',
-                     saved_weights_file='oht_anet_7x7_0')
+actor = ActorNetwork(k=7, anet_config_name='jespee_anet',
+                     saved_weights_file='jespee_anet_7x7_bridges_60', contains_bridges=True)
 
 
 class MyClient(ActorClient):
