@@ -70,7 +70,7 @@ class ActorNetwork(ABC):
         """
         input_case = self.prepare_input_cases([self.vectorize_state(board_state, current_player)])
 
-        output = self.model.predict(input_case, verbose=0)[0]
+        output = self.model(input_case).numpy().flatten()
         output = self.renormalize_output(output, board_state)
 
         action_idx = int(np.argmax(output))

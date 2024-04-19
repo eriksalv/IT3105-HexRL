@@ -51,7 +51,7 @@ class RLTrainer:
                 search_tree = MCTS(self.state_manager, root, self.anet, expansion_threshold=20, c=1.4)
                 if increasing_mcts:
                     # we gradually increase amount of searches to max_value when half the board is filled
-                    budget = math.floor((max_simulations - min_simulations) * (2 * n_moves / self.k ** 2)) \
+                    budget = math.floor((max_simulations - min_simulations) * min(1, (2 * n_moves / self.k ** 2))) \
                              + min_simulations
                     print(budget)
                 else:
@@ -103,23 +103,23 @@ class RLTrainer:
 
 
 if __name__ == "__main__":
-    # game_manager = RLTrainer(k=4, anet_config_name='cnn', contains_bridges=False, padding=2, cnn=True)
-    # game_manager.train(episodes=200,
-    #                    simulations=400,
-    #                    save_interval=10,
-    #                    evaluate_during=False,
-    #                    increasing_mcts=True,
-    #                    min_simulations=100,
-    #                    max_simulations=1000)
-
-    game_manager = RLTrainer(k=4, anet_config_name='anet', contains_bridges=False, padding=0, cnn=False)
+    game_manager = RLTrainer(k=4, anet_config_name='cnn', contains_bridges=False, padding=2, cnn=True)
     game_manager.train(episodes=200,
                        simulations=400,
                        save_interval=10,
                        evaluate_during=False,
                        increasing_mcts=True,
                        min_simulations=100,
-                       max_simulations=1000)
+                       max_simulations=500)
+
+    # game_manager = RLTrainer(k=4, anet_config_name='anet', contains_bridges=False, padding=0, cnn=False)
+    # game_manager.train(episodes=200,
+    #                    simulations=400,
+    #                    save_interval=10,
+    #                    evaluate_during=False,
+    #                    increasing_mcts=True,
+    #                    min_simulations=100,
+    #                    max_simulations=500)
 
     # trainer = RLTrainer(k=4, anet_config_name='anet')
     # trainer.train(episodes=200, simulations=500, save_interval=40)
