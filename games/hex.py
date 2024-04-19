@@ -122,11 +122,8 @@ class HexStateManager:
         middle_line = [(i, j) for i in range(self.k) for j in range(self.k) if i + j == self.k - 1]
         move = random.choice(middle_line)
         self.make_move(move)
-    
-    
-        
 
-    def show_board(self):
+    def show_board(self, block=True):
         """
         There is probably an easier way to visualize the board, but this was too much fun
         """
@@ -180,44 +177,50 @@ class HexStateManager:
             ys = line[:, 1]
             plt.plot(xs, ys, c='black', zorder=-1)
 
-        plt.show(block=True)
+        plt.show(block=block)
 
 
-def mark_bridges(board):
+def mark_bridge_endpoints(board):
     k = len(board)
-    diagonal_offsets = [(-1, 1), (-1, -1), (1, 1), (1, -1)]
+    # We only need to check in the "downward" direction because of symmetry
+    possible_endpoint_offsets = [(1, 1), (2, -1), (-1, 2)]
+    possible_bridge_carrier_offsets = [((1, 0), (0, 1)), ((1, -1), (1, 0)), ((-1, 1), (0, 1))]
 
     for row in range(k):
         for col in range(k):
             # Check if the current cell contains a stone
-            if board[row][col] in {1, 2}:
-                # Check diagonally adjacent cells
-                for dr, dc in diagonal_offsets:
+            if board[row][col] in [1, 2, 3, 4]:
+                for (dr, dc), (carrier1, carrier2) in zip(possible_endpoint_offsets, possible_bridge_carrier_offsets):
                     r, c = row + dr, col + dc
-                    # Check if the diagonal cell is within the board boundaries
-                    if 0 <= r < k and 0 <= c < k and board[r][c] == board[row][col]:
-                        # Mark the connecting coordinates with 3 for player 1 and 4 for player 2
-                        if board[row][col] == 1:
-                            if board[row][c] == 0: board[row][c] = 3
-                            if board[r][col] ==0: board[r][col] = 3
-                        elif board[row][col] == 2:
-                            if board[row][c]==0: board[row][c] = 4
-                            if board[r][col] ==0: board[r][col] = 4
+                    # Check if the diagonal cell is within the board boundaries and that endpoints have the same color
+                    if 0 <= r < k and 0 <= c < k and board[r, c] != 0 and board[r][c] % 2 == board[row][col] % 2:
+                        # Check if both possible bridge carriers are empty
+                        if board[row + carrier1[0], col + carrier1[1]] == 0 and \
+                                board[row + carrier2[0], col + carrier2[1]] == 0:
+                            # Mark the bridge endpoints with 3 for player 1 and 4 for player 2
+                            if board[row][col] % 2 == 1:
+                                board[row, col] = 3
+                                board[r, c] = 3
+                            else:
+                                board[row, col] = 4
+                                board[r, c] = 4
 
     return board
+
 
 if __name__ == "__main__":
     state_manager = HexStateManager(4)
     state_manager.new_game()
-    state_manager.make_move((1,1))
-    state_manager.make_move((3,0))
-    state_manager.make_move((0,0))
-    state_manager.make_move((2,1))
-    state_manager.make_move((2,2))
+    state_manager.make_move((1, 1))
+    state_manager.make_move((3, 0))
+    state_manager.make_move((0, 0))
+    state_manager.make_move((2, 2))
+    state_manager.make_move((0, 2))
+    state_manager.make_move((0, 3))
 
     print(state_manager.board)
 
-
-    #state_manager.show_board()
-    new_board = mark_bridges(state_manager.board)
+    state_manager.show_board(block=False)
+    new_board = mark_bridge_endpoints(state_manager.board)
     print(new_board)
+    plt.show()
