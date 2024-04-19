@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from anet import ActorNetwork
+from networks.basic_anet import BasicActorNet
 from games.hex import HexStateManager, Player
 
 
@@ -29,7 +29,7 @@ class MCTS:
     Implementation of MCTS with UCT exploration bonus
     """
 
-    def __init__(self, state_manager: HexStateManager, root: Node, actor_net: ActorNetwork = None,
+    def __init__(self, state_manager: HexStateManager, root: Node, actor_net: BasicActorNet = None,
                  expansion_threshold=20, c = np.sqrt(2)) -> None:
         self.state_manager = state_manager
         self.root = root

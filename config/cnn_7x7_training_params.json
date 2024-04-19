@@ -1,0 +1,11 @@
+{
+  "episodes": 200,
+  "simulations": 500,
+  "save_interval": 10,
+  "k": 7,
+  "anet_config_name": "cnn",
+  "contains_bridges": false,
+  "cnn": true,
+  "padding": 2
+
+}

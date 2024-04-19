@@ -1,23 +1,56 @@
 {
-    "hidden_layers": [
-      {
-        "type": "SeparableConv2D",
-        "filters": 8,
-        "kernel_size": 2,
-        "activation": "relu",
-        "padding": "valid"
-      },
-      {
-        "type": "Flatten"
-      },
-      {
-        "type": "Dense",
-        "units": 64,
-        "activation": "relu"
-      }
-    ],
-    "optimizer": "Adam",
-    "learning_rate": 0.01,
-    "loss": "categorical_crossentropy"
-  }
+  "hidden_layers": [
+    {
+      "type": "Conv2D",
+      "filters": 32,
+      "kernel_size": 5,
+      "activation": "relu",
+      "padding": "valid"
+    },
+    {
+      "type": "BatchNormalization"
+    },
+    {
+      "type": "Conv2D",
+      "filters": 32,
+      "kernel_size": 3,
+      "activation": "relu",
+      "padding": "same"
+    },
+    {
+      "type": "BatchNormalization"
+    },
+    {
+      "type": "Conv2D",
+      "filters": 32,
+      "kernel_size": 3,
+      "activation": "relu",
+      "padding": "same"
+    },
+    {
+      "type": "BatchNormalization"
+    },
+    {
+      "type": "Conv2D",
+      "filters": 1,
+      "kernel_size": 1,
+      "activation": "relu",
+      "padding": "valid"
+    },
+    {
+      "type": "BatchNormalization"
+    },
+    {
+      "type": "Flatten"
+    },
+    {
+      "type": "Dense",
+      "units": 32,
+      "activation": "relu"
+    }
+  ],
+  "optimizer": "Adam",
+  "learning_rate": 0.01,
+  "loss": "categorical_crossentropy"
+}
   

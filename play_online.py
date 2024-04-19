@@ -1,10 +1,10 @@
 import numpy as np
 
-from anet import ActorNetwork
+from networks.basic_anet import BasicActorNet
 from hex_client.ActorClient import ActorClient
 
-actor = ActorNetwork(k=7, anet_config_name='jespee_anet',
-                     saved_weights_file='jespee_anet_7x7_bridges_60', contains_bridges=True)
+actor = BasicActorNet(k=7, anet_config_name='jespee_anet',
+                      saved_weights_file='jespee_anet_7x7_bridges_55', contains_bridges=True)
 
 
 class MyClient(ActorClient):
