@@ -1,13 +1,20 @@
-from networks.basic_anet import BasicActorNet
 from games.hex import HexStateManager, Player
+from networks.basic_anet import BasicActorNet
+from networks.conv_anet import ConvActorNet
 
 
 class Simulation:
-    def __init__(self, anet: str, anet1_weights_file: str, anet2_weights_file: str, k: int):
+    def __init__(self, anet: str, anet1_weights_file: str, anet2_weights_file: str, k: int, cnn=False, dual=False):
         self.k = k
         # Load ANETs from saved weights files
-        self.anet1 = BasicActorNet(self.k, anet, anet1_weights_file)
-        self.anet2 = BasicActorNet(self.k, anet, anet2_weights_file)
+        if cnn:
+            self.anet1 = ConvActorNet(self.k, anet, anet1_weights_file, padding=2, is_dual_network=dual,
+                                      contains_bridges=True)
+            self.anet2 = ConvActorNet(self.k, anet, anet2_weights_file, padding=2, is_dual_network=dual,
+                                      contains_bridges=True)
+        else:
+            self.anet1 = BasicActorNet(self.k, anet, anet1_weights_file)
+            self.anet2 = BasicActorNet(self.k, anet, anet2_weights_file)
 
     def play_game(self, starting_player, show_board=False):
         hsm = HexStateManager(self.k)
@@ -45,7 +52,7 @@ class Simulation:
         return win_dict
 
 
-def simulate_tourney(epochs: list[int], k=3, anet='anet', n_games=25):
+def simulate_tourney(epochs: list[int], k=3, anet='anet', n_games=25, cnn=False, dual=False):
     model_wins = {epoch: 0 for epoch in epochs}
     for i in epochs:
         for j in epochs:
@@ -53,7 +60,7 @@ def simulate_tourney(epochs: list[int], k=3, anet='anet', n_games=25):
                 continue
 
             sim = Simulation(anet, anet1_weights_file=f'{anet}_{k}x{k}_{i}', anet2_weights_file=f'{anet}_{k}x{k}_{j}',
-                             k=k)
+                             k=k, cnn=cnn, dual=dual)
             res = sim.simulate_games(n_games=n_games)
 
             print(f'player 1: {i}, player 2: {j}')
@@ -70,4 +77,4 @@ def simulate_tourney(epochs: list[int], k=3, anet='anet', n_games=25):
 
 
 if __name__ == '__main__':
-    simulate_tourney(k=4, epochs=[0, 40, 80, 120, 160, 200], anet='anet', n_games=25)
+    simulate_tourney(k=7, epochs=[0, 10], anet='oht_cnn', n_games=25, cnn=True, dual=True)

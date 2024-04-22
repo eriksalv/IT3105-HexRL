@@ -46,10 +46,20 @@ def generate_opponent_state(board_state: np.ndarray, contains_bridges=False):
 
 
 def generate_opponent_distribution(k: int, distribution: np.ndarray) -> np.ndarray:
-    distribution_2d = distribution.reshape((k, k))
+    reward = None
+    if len(distribution) == k ** 2 + 1:
+        reward = distribution[-1] * -1
+        distribution = distribution[:-1]
 
-    rotated_distribution = np.transpose(distribution_2d)
-    return rotated_distribution.flatten()
+    distribution = distribution.reshape((k, k))
+
+    distribution = np.transpose(distribution)
+    distribution = distribution.flatten()
+
+    if reward is not None:
+        return np.append(distribution, reward)
+    else:
+        return distribution
 
 
 def mirror_state(k: int, state: np.ndarray):
@@ -60,10 +70,19 @@ def mirror_state(k: int, state: np.ndarray):
 
 
 def mirror_distribution(k: int, distribution: np.ndarray) -> np.ndarray:
+    reward = None
+    if len(distribution) == k ** 2 + 1:
+        reward = distribution[-1]
+        distribution = distribution[:-1]
+
     distribution = distribution.reshape((k, k))
-    distribution = np.rot90(distribution, 2)
+    distribution = np.transpose(distribution)
     distribution = distribution.flatten()
-    return distribution
+
+    if reward is not None:
+        return np.append(distribution, reward)
+    else:
+        return distribution
 
 
 def play_game(k: int, starting_player: Player, current_best_net: ActorNetwork, new_net: ActorNetwork, show_board=False,
@@ -91,7 +110,7 @@ def play_game(k: int, starting_player: Player, current_best_net: ActorNetwork, n
     return hsm.winner.value
 
 
-def simulate_games(k: int, current_best_net: ActorNetwork, new_net: ActorNetwork, n_games=400, show_board=False,
+def simulate_games(k: int, current_best_net: ActorNetwork, new_net: ActorNetwork, n_games=25, show_board=False,
                    random_move=True):
     win_dict = {1: 0, 2: 0}
     starting_player = Player.RED
@@ -103,17 +122,26 @@ def simulate_games(k: int, current_best_net: ActorNetwork, new_net: ActorNetwork
         # alternate if player 1 (red) or player 2 (blue) starts
         starting_player = Player.BLUE if starting_player == Player.RED else Player.RED
 
+    starting_player = Player.RED
+    for _ in range(n_games):
+        winner = play_game(
+            k, starting_player, new_net, current_best_net, show_board=show_board, random_move=random_move)
+        win_dict[1 if winner == 2 else 2] += 1
+
+        # alternate if player 1 (red) or player 2 (blue) starts
+        starting_player = Player.BLUE if starting_player == Player.RED else Player.RED
+
     return win_dict
 
 
-def evaluate_network(current_best_net, new_net, k, n_games=400, threshold=0.55, random_move=True):
+def evaluate_network(current_best_net, new_net, k, n_games=25, threshold=0.55, random_move=True):
     res = simulate_games(k=k, current_best_net=current_best_net, new_net=new_net, n_games=n_games,
                          random_move=random_move)
     print(res)
-    new_net_wr = res[2] / n_games
+    new_net_wr = res[2] / (2 * n_games)
     print('Winrate of new net: ')
     print(new_net_wr)
-    return new_net_wr > threshold
+    return new_net_wr >= threshold
 
 
 if __name__ == '__main__':

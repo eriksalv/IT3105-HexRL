@@ -5,7 +5,9 @@
       "type": "Dense",
       "units": 1024,
       "activation": "relu"
-    },
+    }
+  ],
+  "distribution_head": [
     {
       "type": "Dense",
       "units": 128,

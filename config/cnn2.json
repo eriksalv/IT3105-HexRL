@@ -34,6 +34,29 @@
   "distribution_head": [
     {
       "type": "Conv2D",
+      "filters": 2,
+      "kernel_size": 1,
+      "activation": "relu",
+      "padding": "valid"
+    },
+    {
+      "type": "BatchNormalization"
+    },
+    {
+      "type": "Flatten"
+    },
+    {
+      "type": "Dense",
+      "activation": "relu",
+      "units": 32
+    },
+    {
+      "type": "BatchNormalization"
+    }
+  ],
+  "evaluation_head": [
+    {
+      "type": "Conv2D",
       "filters": 1,
       "kernel_size": 1,
       "activation": "relu",
@@ -47,12 +70,16 @@
     },
     {
       "type": "Dense",
-      "units": 32,
-      "activation": "relu"
+      "activation": "relu",
+      "units": 16
+    },
+    {
+      "type": "BatchNormalization"
     }
   ],
   "optimizer": "Adam",
   "learning_rate": 0.01,
-  "loss": "categorical_crossentropy"
+  "loss": "categorical_crossentropy",
+  "is_dual_network": true
 }
   
