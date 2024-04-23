@@ -76,7 +76,7 @@ def mirror_distribution(k: int, distribution: np.ndarray) -> np.ndarray:
         distribution = distribution[:-1]
 
     distribution = distribution.reshape((k, k))
-    distribution = np.transpose(distribution)
+    distribution = np.rot90(distribution, 2)
     distribution = distribution.flatten()
 
     if reward is not None:
