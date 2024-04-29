@@ -1,0 +1,64 @@
+{
+    "hidden_layers": [
+      {
+        "type": "Conv2D",
+        "filters": 32,
+        "kernel_size": 3,
+        "activation": "relu",
+        "padding": "valid"
+      },
+      {
+        "type": "BatchNormalization"
+      }
+    ],
+    "distribution_head": [
+      {
+        "type": "Conv2D",
+        "filters": 2,
+        "kernel_size": 1,
+        "activation": "relu",
+        "padding": "valid"
+      },
+      {
+        "type": "BatchNormalization"
+      },
+      {
+        "type": "Flatten"
+      },
+      {
+        "type": "Dense",
+        "activation": "relu",
+        "units": 64
+      },
+      {
+        "type": "BatchNormalization"
+      }
+    ],
+    "evaluation_head": [
+      {
+        "type": "Conv2D",
+        "filters": 1,
+        "kernel_size": 1,
+        "activation": "relu",
+        "padding": "valid"
+      },
+      {
+        "type": "BatchNormalization"
+      },
+      {
+        "type": "Flatten"
+      },
+      {
+        "type": "Dense",
+        "activation": "relu",
+        "units": 32
+      },
+      {
+        "type": "BatchNormalization"
+      }
+    ],
+    "optimizer": "Adam",
+    "learning_rate": 0.003,
+    "loss": "categorical_crossentropy"
+  }
+    

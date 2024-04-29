@@ -1,3 +1,4 @@
+import json
 from games.hex import HexStateManager, Player
 from networks.basic_anet import BasicActorNet
 from networks.conv_anet import ConvActorNet
@@ -52,7 +53,16 @@ class Simulation:
         return win_dict
 
 
-def simulate_tourney(epochs: list[int], k=3, anet='anet', n_games=25, cnn=False, dual=False):
+def simulate_tourney(config_name):
+    with open('./tournament_configs/' + config_name, "r") as file:
+            config = json.load(file)
+    epochs = config.get("epochs", [0, 10, 20, 30, 40, 50])
+    k = config.get("k", 4)
+    anet = config.get("anet", "anet")
+    cnn = config.get("cnn", True)
+    dual = config.get("dual", True)
+    n_games = config.get("n_games", 25)
+
     model_wins = {epoch: 0 for epoch in epochs}
     for i in epochs:
         for j in epochs:
@@ -77,4 +87,4 @@ def simulate_tourney(epochs: list[int], k=3, anet='anet', n_games=25, cnn=False,
 
 
 if __name__ == '__main__':
-    simulate_tourney(k=7, epochs=[0, 10], anet='oht_cnn', n_games=25, cnn=True, dual=True)
+    simulate_tourney("live_demo.json")
