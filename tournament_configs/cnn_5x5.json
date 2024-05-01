@@ -1,0 +1,9 @@
+{
+    "epochs" : [0, 40, 80, 120, 160, 200],
+    "anet" : "cnn2",
+    "n_games": 25,
+    "k" : 5,
+    "cnn" : true,
+    "dual" : false,
+    "show_board": true
+}

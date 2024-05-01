@@ -72,7 +72,7 @@ class ActorNetwork(ABC):
 
         return model
 
-    def train(self, minibatch: list[tuple[np.ndarray, np.ndarray]], verbose=1, epochs=1) -> None:
+    def train(self, minibatch: list[tuple[np.ndarray, np.ndarray]], verbose=1, epochs=1, batch_size=None) -> None:
         """
         Trains the network on the cases in the minibatch.
         Assumes that the minibatch is a list of tuples containing
@@ -89,7 +89,8 @@ class ActorNetwork(ABC):
             y = output_cases
             accuracy = 'accuracy'
 
-        history = self.model.fit(input_cases, y, verbose=verbose, epochs=epochs, batch_size=len(minibatch))
+        history = self.model.fit(input_cases, y, verbose=verbose, epochs=epochs,
+                                 batch_size=batch_size if batch_size else len(minibatch))
 
         self.history['loss'].extend(history.history['loss'])
         self.history['accuracy'].extend(history.history[accuracy])

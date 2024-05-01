@@ -19,22 +19,12 @@
     },
     {
       "type": "BatchNormalization"
-    },
-    {
-      "type": "Conv2D",
-      "filters": 32,
-      "kernel_size": 3,
-      "activation": "relu",
-      "padding": "same"
-    },
-    {
-      "type": "BatchNormalization"
     }
   ],
   "distribution_head": [
     {
       "type": "Conv2D",
-      "filters": 1,
+      "filters": 2,
       "kernel_size": 1,
       "activation": "relu",
       "padding": "valid"
@@ -44,11 +34,6 @@
     },
     {
       "type": "Flatten"
-    },
-    {
-      "type": "Dense",
-      "units": 32,
-      "activation": "relu"
     }
   ],
   "optimizer": "Adam",

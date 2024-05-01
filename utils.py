@@ -85,8 +85,7 @@ def mirror_distribution(k: int, distribution: np.ndarray) -> np.ndarray:
         return distribution
 
 
-def play_game(k: int, starting_player: Player, current_best_net: ActorNetwork, new_net: ActorNetwork, show_board=False,
-              random_move=True):
+def play_game(k: int, starting_player: Player, current_best_net: ActorNetwork, new_net: ActorNetwork, random_move=True):
     hsm = HexStateManager(k)
     hsm.new_game(starting_player=starting_player)
 
@@ -104,19 +103,15 @@ def play_game(k: int, starting_player: Player, current_best_net: ActorNetwork, n
 
         hsm.make_move(action)
 
-    if show_board:
-        hsm.show_board()
-
     return hsm.winner.value
 
 
-def simulate_games(k: int, current_best_net: ActorNetwork, new_net: ActorNetwork, n_games=25, show_board=False,
-                   random_move=True):
+def simulate_games(k: int, current_best_net: ActorNetwork, new_net: ActorNetwork, n_games=25, random_move=True):
     win_dict = {1: 0, 2: 0}
     starting_player = Player.RED
     for _ in range(n_games):
         winner = play_game(
-            k, starting_player, current_best_net, new_net, show_board=show_board, random_move=random_move)
+            k, starting_player, current_best_net, new_net, random_move=random_move)
         win_dict[winner] += 1
 
         # alternate if player 1 (red) or player 2 (blue) starts
@@ -125,7 +120,7 @@ def simulate_games(k: int, current_best_net: ActorNetwork, new_net: ActorNetwork
     starting_player = Player.RED
     for _ in range(n_games):
         winner = play_game(
-            k, starting_player, new_net, current_best_net, show_board=show_board, random_move=random_move)
+            k, starting_player, new_net, current_best_net, random_move=random_move)
         win_dict[1 if winner == 2 else 2] += 1
 
         # alternate if player 1 (red) or player 2 (blue) starts
@@ -157,14 +152,16 @@ if __name__ == '__main__':
     hsm.make_move((1, 0))  # blue
     hsm.make_move((1, 1))  # red
 
-    # hsm.show_board()
+    hsm.show_board(block=False)
 
     final_cases = generate_more_cases(
         (ActorNetwork.vectorize_state(hsm.board, hsm.current_player.value), np.array([0, 0, 0, 0, 0, 0, 0, 1, 0])), k)
 
-    # hsm.board = final_cases[1][0][:-1].reshape(k, k)
+    hsm.board = final_cases[1][0][:-1].reshape(k, k)
 
-    # hsm.show_board()
+    hsm.show_board(block=False)
+
+    plt.show()
 
     # print(np.flip(hsm.board.flatten(), axis=0)) # faster? seems like this performs the same operation
 

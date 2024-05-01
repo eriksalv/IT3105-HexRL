@@ -3,7 +3,7 @@
       {
         "type": "Conv2D",
         "filters": 32,
-        "kernel_size": 3,
+        "kernel_size": 5,
         "activation": "relu",
         "padding": "valid"
       },
@@ -24,14 +24,6 @@
       },
       {
         "type": "Flatten"
-      },
-      {
-        "type": "Dense",
-        "activation": "relu",
-        "units": 64
-      },
-      {
-        "type": "BatchNormalization"
       }
     ],
     "evaluation_head": [
@@ -47,18 +39,10 @@
       },
       {
         "type": "Flatten"
-      },
-      {
-        "type": "Dense",
-        "activation": "relu",
-        "units": 32
-      },
-      {
-        "type": "BatchNormalization"
       }
     ],
     "optimizer": "Adam",
-    "learning_rate": 0.003,
+    "learning_rate": 0.01,
     "loss": "categorical_crossentropy"
   }
     

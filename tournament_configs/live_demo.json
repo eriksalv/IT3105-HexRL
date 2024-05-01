@@ -1,8 +1,9 @@
 {
     "epochs" : [0, 10, 20, 30, 40, 50],
-    "anet" : "cnn_live_demo",
+    "anet" : "anet_live_demo",
     "n_games": 25,
     "k" : 4,
-    "cnn" : true,
-    "dual" : true
+    "cnn" : false,
+    "dual" : false,
+    "show_board": true
 }

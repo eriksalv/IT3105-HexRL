@@ -1,6 +1,7 @@
 import random
 from enum import Enum
 
+import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -16,6 +17,7 @@ class HexStateManager:
         self.winner = None
         self.board = np.zeros((self.k, self.k), dtype=np.int8)
         self.current_player = Player.RED
+        self.frames = []
 
     def new_game(self, starting_player=Player.RED) -> None:
         """
@@ -123,10 +125,19 @@ class HexStateManager:
         move = random.choice(middle_line)
         self.make_move(move)
 
-    def show_board(self, block=True):
+    def add_frame(self):
         """
         There is probably an easier way to visualize the board, but this was too much fun
         """
+        col = np.where(self.board == 1, 'red',
+                       np.where(self.board == 2, 'blue',
+                                'black')).flatten()
+
+        self.frames.append(col)
+
+    def show_board(self, filename=None, animate=False, block=False):
+        fig, ax = plt.subplots(figsize=(16, 9))
+
         enumerated = list(np.ndenumerate(self.board))
         coords = np.array([enum[0] for enum in enumerated])
 
@@ -149,13 +160,15 @@ class HexStateManager:
         xs = rot_coords[:, 0]
         ys = rot_coords[:, 1]
 
-        col = np.where(self.board == 1, 'red',
-                       np.where(self.board == 2, 'blue',
-                                'black')).flatten()
-
-        plt.figure(figsize=(10, 15))
         plt.axis('off')
-        plt.scatter(xs, ys, s=200, c=col)
+
+        if animate:
+            scat = ax.scatter(xs, ys, s=200, c='black')
+        else:
+            col = np.where(self.board == 1, 'red',
+                           np.where(self.board == 2, 'blue',
+                                    'black')).flatten()
+            scat = ax.scatter(xs, ys, s=200, c=col)
 
         if self.winner == Player.RED:
             plt.title('Red wins', c='red')
@@ -163,21 +176,38 @@ class HexStateManager:
             plt.title('Blue wins', c='blue')
 
         for i, coord in enumerate(enumerated):
-            plt.annotate(coord[0], (xs[i], ys[i]), (xs[i] + 0.1, ys[i] - 0.1))
+            ax.annotate(coord[0], (xs[i], ys[i]), (xs[i] + 0.1, ys[i] - 0.1))
 
         for lines in [horizontal_grids, vertical_grids]:
             lines = lines.dot(flip).dot(rot_neg45)
             xs = lines[:, :, 0]
             ys = lines[:, :, 1]
-            plt.plot(xs, ys, c='black', zorder=-1)
+            ax.plot(xs, ys, c='black', zorder=-1)
 
         for line in diagonal_grids:
             line = line.dot(flip).dot(rot_neg45)
             xs = line[:, 0]
             ys = line[:, 1]
-            plt.plot(xs, ys, c='black', zorder=-1)
+            ax.plot(xs, ys, c='black', zorder=-1)
 
-        plt.show(block=block)
+        if animate:
+            def update(frame):
+                scat.set_color(self.frames[frame])
+                return scat
+
+            ani = animation.FuncAnimation(fig=fig, func=update, frames=len(self.frames), interval=1500)
+
+            if filename is None:
+                plt.show(block=block)
+            else:
+                ani.save(f'plots/{filename}.gif')
+                plt.close()
+        else:
+            if filename is None:
+                plt.show(block=block)
+            else:
+                plt.savefig(f'plots/{filename}.png')
+                plt.close()
 
 
 def mark_bridge_endpoints(board):
@@ -211,16 +241,19 @@ def mark_bridge_endpoints(board):
 if __name__ == "__main__":
     state_manager = HexStateManager(4)
     state_manager.new_game()
+
     state_manager.make_move((1, 1))
+    state_manager.add_frame()
     state_manager.make_move((3, 0))
+    state_manager.add_frame()
     state_manager.make_move((0, 0))
+    state_manager.add_frame()
     state_manager.make_move((2, 2))
+    state_manager.add_frame()
     state_manager.make_move((0, 2))
+    state_manager.add_frame()
     state_manager.make_move((0, 3))
+    state_manager.add_frame()
 
     print(state_manager.board)
-
-    state_manager.show_board(block=False)
-    new_board = mark_bridge_endpoints(state_manager.board)
-    print(new_board)
-    plt.show()
+    state_manager.show_board(animate=True, block=True)
