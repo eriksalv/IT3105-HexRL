@@ -1,9 +1,9 @@
 {
-    "epochs" : [0, 10, 20, 30, 40, 50],
+    "epochs" : [0,5, 10,15, 20],
     "anet" : "anet_live_demo",
-    "n_games": 25,
+    "n_games": 200,
     "k" : 4,
     "cnn" : false,
     "dual" : false,
-    "show_board": true
+    "show_board": false
 }

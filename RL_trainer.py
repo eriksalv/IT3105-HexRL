@@ -134,9 +134,9 @@ class RLTrainer:
                 for case in cases[i]:
                     self.replay_buffer.add_case(case)
 
-                minibatch = self.replay_buffer.get_minibatch(batch_size=self.batch_size)
-                self.anet.train(minibatch, epochs=1)
-
+            minibatch = self.replay_buffer.get_minibatch(batch_size=self.batch_size)
+            self.anet.train(minibatch, epochs=1)
+            
             end = time.perf_counter()
             print(f'time: {end - start:.1f}s')
 
@@ -158,5 +158,5 @@ class RLTrainer:
 
 
 if __name__ == "__main__":
-    game_manager = RLTrainer("cnn_5x5.json")
+    game_manager = RLTrainer("live_demo.json")
     game_manager.train()
