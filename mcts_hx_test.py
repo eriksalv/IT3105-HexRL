@@ -1,6 +1,9 @@
-from hex import HexStateManager
-from mcts.mcts import MCTS, Node
 import numpy as np
+
+from networks.basic_anet import BasicActorNet
+from games.hex import HexStateManager, Player
+from mcts import MCTS, Node
+
 
 def find_last_move(prev_state, current_state):
     diff = current_state - prev_state
@@ -10,21 +13,44 @@ def find_last_move(prev_state, current_state):
         return tuple(indices[0])
     else:
         raise ValueError("Invalid states: More than one difference found.")
-    
+
+
 if __name__ == "__main__":
-    hsm = HexStateManager(3) 
-    hsm.new_game()
-    hsm.make_move((0,0))
-    hsm.make_move((2,0))
-    hsm.make_move((0,1))
-    hsm.make_move((1,0))
-    hsm.make_move((1,1))
-    hsm.make_move((1,2))
-    #hsm.show_board()
-    #hsm.make_move((2,1)) winning move
-    root_state = hsm
-    root = Node(root_state)
-    mcts = MCTS(root)
-    best_child = mcts.search(100)
-    best_move = find_last_move(root_state.board, best_child.state.board)
+    k = 3
+    hsm = HexStateManager(k)
+    hsm.new_game(starting_player=Player.BLUE)
+    hsm.make_move((0, 0))
+    hsm.make_move((1, 0))
+    hsm.make_move((0, 1))
+    hsm.make_move((1, 1))
+    # hsm.make_move((0,2)) winning move
+
+    root = Node(state=hsm.get_state())
+
+    net = BasicActorNet(3, 'anet')
+    mcts = MCTS(state_manager=hsm, root=root, actor_net=net)
+    best_move, distribution = mcts.search(100)
     print(f"Best move: {best_move} ")
+    print(distribution)
+    print(root.value)
+    print(root.actions)
+
+    hsm = HexStateManager(k)
+    hsm.new_game()
+    hsm.make_move((1, 0))
+    hsm.make_move((2, 0))
+    hsm.make_move((0, 1))
+    hsm.make_move((1, 1))
+    hsm.make_move((1, 2))
+    hsm.show_board()
+    # hsm.make_move((0,2)) winning move
+
+    root = Node(state=hsm.get_state())
+
+    net = BasicActorNet(3, 'anet')
+    mcts = MCTS(state_manager=hsm, root=root, actor_net=net)
+    best_move, distribution = mcts.search(100)
+    print(f"Best move: {best_move} ")
+    print(distribution)
+    print(root.value)
+    print(root.actions)

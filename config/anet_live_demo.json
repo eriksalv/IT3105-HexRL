@@ -1,0 +1,15 @@
+{
+  "learning_rate": 0.01,
+  "hidden_layers": [
+
+  ],
+  "distribution_head": [
+    {
+      "type": "Dense",
+      "units": 32,
+      "activation": "relu"
+    }
+  ],
+  "optimizer": "Adam",
+  "loss": "categorical_crossentropy"
+}
