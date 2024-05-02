@@ -10,7 +10,8 @@ from networks.basic_anet import BasicActorNet
 from networks.conv_anet import ConvActorNet
 from rbuf import ReplayBuffer
 from utils import generate_more_cases, evaluate_network
-
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 class RLTrainer:
     def __init__(self, config_name):
@@ -158,5 +159,5 @@ class RLTrainer:
 
 
 if __name__ == "__main__":
-    game_manager = RLTrainer("live_demo_cnn.json")
+    game_manager = RLTrainer("live_demo.json")
     game_manager.train()

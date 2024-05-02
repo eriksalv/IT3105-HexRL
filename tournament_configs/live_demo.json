@@ -1,7 +1,7 @@
 {
     "epochs" : [0,5, 10,15, 20],
     "anet" : "anet_live_demo",
-    "n_games": 200,
+    "n_games": 50,
     "k" : 4,
     "cnn" : false,
     "dual" : false,
