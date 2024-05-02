@@ -95,4 +95,4 @@ def simulate_tourney(config_name):
 
 
 if __name__ == '__main__':
-    simulate_tourney("live_demo.json")
+    simulate_tourney("live_demo_cnn.json")

@@ -3,7 +3,7 @@
       {
         "type": "Conv2D",
         "filters": 32,
-        "kernel_size": 5,
+        "kernel_size": 2,
         "activation": "relu",
         "padding": "valid"
       },
@@ -42,7 +42,7 @@
       }
     ],
     "optimizer": "Adam",
-    "learning_rate": 0.01,
+    "learning_rate": 0.004,
     "loss": "categorical_crossentropy"
   }
     
