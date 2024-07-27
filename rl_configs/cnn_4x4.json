@@ -1,0 +1,17 @@
+{
+    "episodes": 200,
+    "save_interval": 10,
+    "k": 4,
+    "anet_config_name": "cnn",
+    "contains_bridges": true,
+    "cnn": true,
+    "padding": 2,
+    "max_rbuf_size": 512,
+    "batch_size": 128,
+    "expansion_threshold": 10,
+    "use_dual_network" : false,
+    "min_simulations" : 100,
+    "max_simulations" : 600,
+    "n_pretrained_episodes" : 0,
+    "evaluate_during" : true
+  }

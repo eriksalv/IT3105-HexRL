@@ -1,20 +1,20 @@
 {
-    "learning_rate": 0.001,
-    "hidden_layers": [
-      {
-        "units": 1024,
-        "activation": "relu"
-      },
-    
-      {
-        "units": 128,
-        "activation": "relu"
-      }
-    ],
-    "optimizer": "Adam",
-    "optimizer_kwargs": {
-  
-    },
-    "loss": "categorical_crossentropy"
-  }
+  "learning_rate": 0.001,
+  "hidden_layers": [
+    {
+      "type": "Dense",
+      "units": 1024,
+      "activation": "relu"
+    }
+  ],
+  "distribution_head": [
+    {
+      "type": "Dense",
+      "units": 128,
+      "activation": "relu"
+    }
+  ],
+  "optimizer": "Adam",
+  "loss": "categorical_crossentropy"
+}
   

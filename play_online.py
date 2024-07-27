@@ -1,10 +1,10 @@
 import numpy as np
 
-from anet import ActorNetwork
 from hex_client.ActorClient import ActorClient
+from networks.conv_anet import ConvActorNet
 
-actor = ActorNetwork(k=7, anet_config_name='jespee_anet',
-                     saved_weights_file='jespee_anet_7x7_bridges_60', contains_bridges=True)
+actor = ConvActorNet(k=7, anet_config_name='oht_cnn',
+                     saved_weights_file='oht_cnn_7x7_10', contains_bridges=True, is_dual_network=True)
 
 
 class MyClient(ActorClient):

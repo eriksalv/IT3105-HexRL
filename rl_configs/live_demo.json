@@ -1,0 +1,18 @@
+{
+    "episodes": 20,
+    "save_interval": 5,
+    "k": 4,
+    "anet_config_name": "anet_live_demo",
+    "contains_bridges": true,
+    "cnn": false,
+    "padding": 0,
+    "max_rbuf_size": 512,
+    "batch_size": 128,
+    "expansion_threshold": 5,
+    "use_dual_network" : false,
+    "min_simulations" : 50,
+    "max_simulations" : 200,
+    "n_pretrained_episodes" : 0,
+    "evaluate_during" : false,
+    "show_board": true
+  }

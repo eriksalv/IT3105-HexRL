@@ -1,6 +1,7 @@
 import random
 from enum import Enum
 
+import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -16,6 +17,7 @@ class HexStateManager:
         self.winner = None
         self.board = np.zeros((self.k, self.k), dtype=np.int8)
         self.current_player = Player.RED
+        self.frames = []
 
     def new_game(self, starting_player=Player.RED) -> None:
         """
@@ -122,14 +124,20 @@ class HexStateManager:
         middle_line = [(i, j) for i in range(self.k) for j in range(self.k) if i + j == self.k - 1]
         move = random.choice(middle_line)
         self.make_move(move)
-    
-    
-        
 
-    def show_board(self):
+    def add_frame(self):
         """
         There is probably an easier way to visualize the board, but this was too much fun
         """
+        col = np.where(self.board == 1, 'red',
+                       np.where(self.board == 2, 'blue',
+                                'black')).flatten()
+
+        self.frames.append(col)
+
+    def show_board(self, filename=None, animate=False, block=False):
+        fig, ax = plt.subplots(figsize=(16, 9))
+
         enumerated = list(np.ndenumerate(self.board))
         coords = np.array([enum[0] for enum in enumerated])
 
@@ -152,13 +160,15 @@ class HexStateManager:
         xs = rot_coords[:, 0]
         ys = rot_coords[:, 1]
 
-        col = np.where(self.board == 1, 'red',
-                       np.where(self.board == 2, 'blue',
-                                'black')).flatten()
-
-        plt.figure(figsize=(10, 15))
         plt.axis('off')
-        plt.scatter(xs, ys, s=200, c=col)
+
+        if animate:
+            scat = ax.scatter(xs, ys, s=200, c='black')
+        else:
+            col = np.where(self.board == 1, 'red',
+                           np.where(self.board == 2, 'blue',
+                                    'black')).flatten()
+            scat = ax.scatter(xs, ys, s=200, c=col)
 
         if self.winner == Player.RED:
             plt.title('Red wins', c='red')
@@ -166,58 +176,84 @@ class HexStateManager:
             plt.title('Blue wins', c='blue')
 
         for i, coord in enumerate(enumerated):
-            plt.annotate(coord[0], (xs[i], ys[i]), (xs[i] + 0.1, ys[i] - 0.1))
+            ax.annotate(coord[0], (xs[i], ys[i]), (xs[i] + 0.1, ys[i] - 0.1))
 
         for lines in [horizontal_grids, vertical_grids]:
             lines = lines.dot(flip).dot(rot_neg45)
             xs = lines[:, :, 0]
             ys = lines[:, :, 1]
-            plt.plot(xs, ys, c='black', zorder=-1)
+            ax.plot(xs, ys, c='black', zorder=-1)
 
         for line in diagonal_grids:
             line = line.dot(flip).dot(rot_neg45)
             xs = line[:, 0]
             ys = line[:, 1]
-            plt.plot(xs, ys, c='black', zorder=-1)
+            ax.plot(xs, ys, c='black', zorder=-1)
 
-        plt.show(block=True)
+        if animate:
+            def update(frame):
+                scat.set_color(self.frames[frame])
+                return scat
+
+            ani = animation.FuncAnimation(fig=fig, func=update, frames=len(self.frames), interval=1500)
+
+            if filename is None:
+                plt.show(block=block)
+            else:
+                ani.save(f'plots/{filename}.gif')
+                plt.close()
+        else:
+            if filename is None:
+                plt.show(block=block)
+            else:
+                plt.savefig(f'plots/{filename}.png')
+                plt.close()
 
 
-def mark_bridges(board):
+def mark_bridge_endpoints(board):
     k = len(board)
-    diagonal_offsets = [(-1, 1), (-1, -1), (1, 1), (1, -1)]
+    # We only need to check in the "downward" direction because of symmetry
+    possible_endpoint_offsets = [(1, 1), (2, -1), (-1, 2)]
+    possible_bridge_carrier_offsets = [((1, 0), (0, 1)), ((1, -1), (1, 0)), ((-1, 1), (0, 1))]
 
     for row in range(k):
         for col in range(k):
             # Check if the current cell contains a stone
-            if board[row][col] in {1, 2}:
-                # Check diagonally adjacent cells
-                for dr, dc in diagonal_offsets:
+            if board[row][col] in [1, 2, 3, 4]:
+                for (dr, dc), (carrier1, carrier2) in zip(possible_endpoint_offsets, possible_bridge_carrier_offsets):
                     r, c = row + dr, col + dc
-                    # Check if the diagonal cell is within the board boundaries
-                    if 0 <= r < k and 0 <= c < k and board[r][c] == board[row][col]:
-                        # Mark the connecting coordinates with 3 for player 1 and 4 for player 2
-                        if board[row][col] == 1:
-                            if board[row][c] == 0: board[row][c] = 3
-                            if board[r][col] ==0: board[r][col] = 3
-                        elif board[row][col] == 2:
-                            if board[row][c]==0: board[row][c] = 4
-                            if board[r][col] ==0: board[r][col] = 4
+                    # Check if the diagonal cell is within the board boundaries and that endpoints have the same color
+                    if 0 <= r < k and 0 <= c < k and board[r, c] != 0 and board[r][c] % 2 == board[row][col] % 2:
+                        # Check if both possible bridge carriers are empty
+                        if board[row + carrier1[0], col + carrier1[1]] == 0 and \
+                                board[row + carrier2[0], col + carrier2[1]] == 0:
+                            # Mark the bridge endpoints with 3 for player 1 and 4 for player 2
+                            if board[row][col] % 2 == 1:
+                                board[row, col] = 3
+                                board[r, c] = 3
+                            else:
+                                board[row, col] = 4
+                                board[r, c] = 4
 
     return board
+
 
 if __name__ == "__main__":
     state_manager = HexStateManager(4)
     state_manager.new_game()
-    state_manager.make_move((1,1))
-    state_manager.make_move((3,0))
-    state_manager.make_move((0,0))
-    state_manager.make_move((2,1))
-    state_manager.make_move((2,2))
+
+    state_manager.make_move((1, 1))
+    state_manager.add_frame()
+    state_manager.make_move((3, 0))
+    state_manager.add_frame()
+    state_manager.make_move((0, 0))
+    state_manager.add_frame()
+    state_manager.make_move((2, 2))
+    state_manager.add_frame()
+    state_manager.make_move((0, 2))
+    state_manager.add_frame()
+    state_manager.make_move((0, 3))
+    state_manager.add_frame()
 
     print(state_manager.board)
-
-
-    #state_manager.show_board()
-    new_board = mark_bridges(state_manager.board)
-    print(new_board)
+    state_manager.show_board(animate=True, block=True)

@@ -36,6 +36,21 @@
       "type": "Flatten"
     }
   ],
+  "evaluation_head": [
+    {
+      "type": "Conv2D",
+      "filters": 1,
+      "kernel_size": 1,
+      "activation": "relu",
+      "padding": "valid"
+    },
+    {
+      "type": "BatchNormalization"
+    },
+    {
+      "type": "Flatten"
+    }
+  ],
   "optimizer": "Adam",
   "learning_rate": 0.01,
   "loss": "categorical_crossentropy"

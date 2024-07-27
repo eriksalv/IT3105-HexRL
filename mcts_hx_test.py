@@ -1,6 +1,6 @@
 import numpy as np
 
-from anet import ActorNetwork
+from networks.basic_anet import BasicActorNet
 from games.hex import HexStateManager, Player
 from mcts import MCTS, Node
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     root = Node(state=hsm.get_state())
 
-    net = ActorNetwork(3, 'anet')
+    net = BasicActorNet(3, 'anet')
     mcts = MCTS(state_manager=hsm, root=root, actor_net=net)
     best_move, distribution = mcts.search(100)
     print(f"Best move: {best_move} ")
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     root = Node(state=hsm.get_state())
 
-    net = ActorNetwork(3, 'anet')
+    net = BasicActorNet(3, 'anet')
     mcts = MCTS(state_manager=hsm, root=root, actor_net=net)
     best_move, distribution = mcts.search(100)
     print(f"Best move: {best_move} ")

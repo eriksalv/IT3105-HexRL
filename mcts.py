@@ -2,8 +2,8 @@ import random
 
 import numpy as np
 
-from anet import ActorNetwork
 from games.hex import HexStateManager, Player
+from networks.anet import ActorNetwork
 
 
 class Node:
@@ -30,13 +30,14 @@ class MCTS:
     """
 
     def __init__(self, state_manager: HexStateManager, root: Node, actor_net: ActorNetwork = None,
-                 expansion_threshold=20, c = np.sqrt(2)) -> None:
+                 expansion_threshold=20, c=np.sqrt(2)) -> None:
         self.state_manager = state_manager
         self.root = root
         self.actor_net = actor_net
         self.expansion_threshold = expansion_threshold
         self.c = c
-        #self.root.init_actions_and_values(self.state_manager.get_legal_moves())
+        # self.root.init_actions_and_values(self.state_manager.get_legal_moves())
+
     def reset_position(self) -> None:
         """
         Resets board to root position and player
@@ -46,35 +47,43 @@ class MCTS:
         self.state_manager.new_game(Player(player))
         self.state_manager.board = board.copy()
 
-    def search(self, simulations=1000) -> tuple[tuple[int, int], dict[tuple[int, int], float]]:
+    def search(self, simulations=1000, sigma=1.0) -> tuple[tuple[int, int], dict[tuple[int, int], float]]:
         """
         Runs mcts simulations, and returns the best action and
         distribution of actions
 
         Args:
             simulations: no. of simulations
+            sigma: prob. of doing rollouts instead of critic
 
         Returns:
             best action, distribution
         """
         for i in range(simulations):
-            self.simulate()
+            self.simulate(sigma)
 
         self.reset_position()
         distribution = self.get_distribution()
         best_action = max(distribution, key=distribution.get)
         return best_action, distribution
 
-    def simulate(self) -> None:
+    def simulate(self, sigma=1.0) -> None:
         """
-        Runs a single mcts simulation (tree_policy + rollout + backprop)
+        Runs a single mcts simulation (tree_policy + rollout + backprop).
+        If actor net is an actor-critic dual network, then there is a chance
+        to skip rollouts and get network eval from leaf node
         """
         self.reset_position()
         leaf = self.sim_tree_policy()
-        reward = self.sim_rollout()
+
+        if self.actor_net.is_dual_network and random.random() > sigma:
+            reward = self.actor_net.get_eval(board_state=leaf.state[0], current_player=leaf.state[1])
+        else:
+            reward = self.sim_rollout()
+
         self.backpropagate(leaf, reward)
 
-    def sim_tree_policy(self, use_expansion_threshold=True) -> Node:
+    def sim_tree_policy(self) -> Node:
         """
         Runs tree policy until a leaf node is reached.
         If using expansion_threshold then a leaf node will
@@ -95,7 +104,7 @@ class MCTS:
                 node = node.children[action]
                 continue
 
-            if not use_expansion_threshold:
+            if self.expansion_threshold is None:
                 self.state_manager.make_move(action)
                 child_state = self.state_manager.get_state()
                 node.expand(action, child_state)
@@ -103,7 +112,7 @@ class MCTS:
                 node.init_actions_and_values(self.state_manager.get_legal_moves())
 
             if len(node.children) == 0:
-                if use_expansion_threshold and node.visits >= self.expansion_threshold:
+                if self.expansion_threshold and node.visits >= self.expansion_threshold:
                     legal_moves = self.state_manager.get_legal_moves()
                     child_states = self.state_manager.get_possible_states(legal_moves)
                     for move, child_state in zip(legal_moves, child_states):
@@ -118,7 +127,7 @@ class MCTS:
 
         return node
 
-    def select_move_uct(self, node: Node, c=np.sqrt(2)) -> tuple[int, int]:
+    def select_move_uct(self, node: Node) -> tuple[int, int]:
         """
         Selects the best move from given node according to uct.
         If node has unvisited children, then choose one of those at random
@@ -150,7 +159,7 @@ class MCTS:
         else:
             return legal_moves[np.argmin(values - ucts)]
 
-    def sim_rollout(self, epsilon=.1) -> int:
+    def sim_rollout(self, epsilon=0.1) -> int:
         """
         Epsilon greedy rollout from leaf node
 
@@ -172,9 +181,9 @@ class MCTS:
             try:
                 self.state_manager.make_move(action)
             except ValueError as e:
-                    print(f"Failed move: {action}")
-                    print(f"Current state before failure: " )
-                    print(self.state_manager.board)
+                print(f"Failed move: {action}")
+                print(f"Current state before failure: ")
+                print(self.state_manager.board)
             state = self.state_manager.get_state()
 
         return 1 if self.state_manager.winner == Player.RED else -1
@@ -206,5 +215,5 @@ class MCTS:
             A dictionary mapping actions to their visit counts, normalized to form a probability distribution.
         """
         total_visits = sum(visits for visits in self.root.actions.values())
-        
+
         return {action: visits / total_visits for action, visits in self.root.actions.items()}
